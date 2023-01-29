@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  node:
+    build: .
+    init: true
+    restart: always
+    environment:
+      - PROMETHEUS_ENDPOINT=http://192.168.10.238:9090
+    ports:
+      - "127.0.0.1:8088:3000"
