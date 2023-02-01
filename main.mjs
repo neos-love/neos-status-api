@@ -25,16 +25,24 @@ const prometheus_query_range = async (qn, start, end, step) => {
 }
 
 const label_list = [
-    "neos_registeredUserCount",
-    "neos_vrUserCount",
-    "neos_headlessUserCount",
-    "neos_screenUserCount",
-    "neos_mobileUserCount"
+    "neos_registered_users",
+    "neos_online_users{device=\"vr\"}",
+    "neos_online_users{device=\"headless\"}",
+    "neos_online_users{device=\"screen\"}",
+    "neos_online_users{device=\"mobile\"}"
 ]
+
+const labelMap = {
+    "neos_registered_users": "neos_registeredUserCount",
+    "neos_online_users{device=\"vr\"}" : "neos_vrUserCount",
+    "neos_online_users{device=\"headless\"}": "neos_headlessUserCount",
+    "neos_online_users{device=\"screen\"}": "neos_screenUserCount",
+    "neos_online_users{device=\"mobile\"}": "neos_mobileUserCount"
+}
 app.get("/v1/neos/usercount", async (req, res) => {
     let tmpObj = {}
     for (const qn of label_list) {
-        tmpObj[qn] = await prometheus_query(qn)
+        tmpObj[labelMap[qn]] = await prometheus_query(qn)
     }
     res.json(tmpObj)
 })
@@ -46,7 +54,7 @@ app.get("/v1/neos/usercount/1d", async (req, res) => {
     start.setDate(end.getDate() - 1)
 
     for (const qn of label_list) {
-        tmpObj[qn] = await prometheus_query_range(qn,start.toISOString(), end.toISOString(), "6m" )
+        tmpObj[labelMap[qn]] = await prometheus_query_range(qn,start.toISOString(), end.toISOString(), "6m" )
     }
     res.json(tmpObj)
 })
