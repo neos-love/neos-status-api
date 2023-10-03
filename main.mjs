@@ -2,7 +2,7 @@ import express from "express"
 import axios from "axios"
 import cors from "cors"
 
-const ENDPOINT = process.env.PROMETHEUS_ENDPOINT || "http://192.168.10.238:9090"
+const ENDPOINT = process.env.PROMETHEUS_ENDPOINT || "http://192.168.10.238:8428"
 
 const app = express()
 app.use(cors())
@@ -43,6 +43,30 @@ app.get("/v1/neos/usercount", async (req, res) => {
     let tmpObj = {}
     for (const qn of label_list) {
         tmpObj[labelMap[qn]] = await prometheus_query(qn)
+    }
+    res.json(tmpObj)
+})
+
+const resonite_label_list = [
+    "resonite_registered_users",
+    "resonite_users{type=\"VR\"}",
+    "resonite_users{type=\"Screen\"}",
+    "resonite_users{type=\"Mobile\"}",
+    "resonite_users_by_client_type{type=\"Headless\"}",
+]
+
+const resonite_labelMap = {
+    "resonite_registered_users": "resonite_all",
+    "resonite_users{type=\"VR\"}" : "resonite_vr",
+    "resonite_users{type=\"Screen\"}": "resonite_screen",
+    "resonite_users{type=\"Mobile\"}": "resonite_mobile",
+    "resonite_users_by_client_type{type=\"Headless\"}": "resonite_headless"
+}
+
+app.get("/v1/resonite/usercount", async (req, res) => {
+    let tmpObj = {}
+    for (const qn of resonite_label_list) {
+        tmpObj[resonite_labelMap[qn]] = await prometheus_query(qn)
     }
     res.json(tmpObj)
 })
